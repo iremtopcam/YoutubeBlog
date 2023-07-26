@@ -11,52 +11,43 @@ using YoutubeBlog.Data.Repostories.Abstractions;
 
 namespace YoutubeBlog.Data.Repostories.Concretes
 {
-    internal class Repository<T>: IRepository<T> where T: class, IEntityBase,new()
+    public class Repository<T> : IRepository<T> where T : class, IEntityBase, new()
     {
+
         private readonly AppDbContext dbContext;
-        public Repository(AppDbContext dbContext) 
+        public Repository(AppDbContext dbContext)
         {
             this.dbContext = dbContext;
-        
         }
         private DbSet<T> Table { get => dbContext.Set<T>(); }
 
-        private async Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate = null,params Expression<Func<T,object>>[] includeProperties)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate = null, params Expression<Func<T, object>>[] includeProperties)
         {
             IQueryable<T> query = Table;
-            if(predicate != null)
+            if (predicate != null)
                 query = query.Where(predicate);
 
-            if (includeProperties.Any()) 
+            if (includeProperties.Any())
                 foreach (var item in includeProperties)
-                    query=query.Include(item);
+                    query = query.Include(item);
 
             return await query.ToListAsync();
-
-
         }
         public async Task AddAsync(T entity)
         {
             await Table.AddAsync(entity);
-
         }
 
-        Task<List<T>> IRepository<T>.GetAllAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includeProperties)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate ,params Expression<Func<T, object>>[] includeProperties)
+        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includeProperties)
         {
             IQueryable<T> query = Table;
-            query= query.Where(predicate);
+            query = query.Where(predicate);
 
             if (includeProperties.Any())
                 foreach (var item in includeProperties)
                     query = query.Include(item);
 
             return await query.SingleAsync();
-
         }
 
         public async Task<T> GetByGuidAsync(Guid id)
@@ -66,7 +57,7 @@ namespace YoutubeBlog.Data.Repostories.Concretes
 
         public async Task<T> UpdateAsync(T entity)
         {
-            await Task.Run(()=> Table.Update(entity));
+            await Task.Run(() => Table.Update(entity));
             return entity;
         }
 
@@ -80,9 +71,11 @@ namespace YoutubeBlog.Data.Repostories.Concretes
             return await Table.AnyAsync(predicate);
         }
 
-        public async Task<int> CountAsync(Expression<Func<T, bool>> predicate=null)
+        public async Task<int> CountAsync(Expression<Func<T, bool>> predicate = null)
         {
-            return await Table.CountAsync(predicate);
+            if (predicate is not null)
+                return await Table.CountAsync(predicate);
+            return await Table.CountAsync();
         }
     }
 }

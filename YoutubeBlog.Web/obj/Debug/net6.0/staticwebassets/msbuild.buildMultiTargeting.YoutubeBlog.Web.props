@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\YoutubeBlog.Web.props" />
-</Project>

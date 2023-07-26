@@ -14,15 +14,25 @@ namespace YoutubeBlog.Data.Extensions
 {
     public static class DataLayerExtension
     {
+        //public static IServiceCollection LoadDataLayerExtension(this IServiceCollection services, IConfiguration config)
+        //{
+        //    //her repositorye istek yolladiğimizde repository nesnesini getir
+        //    services.AddScoped(typeof(IRepository<>), typeof(IRepository<>));
+
+        //    services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+        //    return services;
+
+        //}
+
         public static IServiceCollection LoadDataLayerExtension(this IServiceCollection services, IConfiguration config)
         {
-            //her repositorye istek yolladiğimizde repository nesnesini getir
-            services.AddScoped(typeof(IRepository<>), typeof(IRepository<>));
-
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
-            return services;
 
+            //services.AddScoped<IUnitOfWork, UnitOfWork>();
+            return services;
         }
-          
+
+
     }
 }
