@@ -1,0 +1,14 @@
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\bin\Debug\net6.0\YoutubeBlog.Core.deps.json
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\bin\Debug\net6.0\YoutubeBlog.Core.runtimeconfig.json
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\bin\Debug\net6.0\YoutubeBlog.Core.dll
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\bin\Debug\net6.0\YoutubeBlog.Core.pdb
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\YoutubeBlog.Core.csproj.AssemblyReference.cache
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\YoutubeBlog.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\YoutubeBlog.Core.AssemblyInfoInputs.cache
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\YoutubeBlog.Core.AssemblyInfo.cs
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\YoutubeBlog.Core.csproj.CoreCompileInputs.cache
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\YoutubeBlog.Core.dll
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\refint\YoutubeBlog.Core.dll
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\YoutubeBlog.Core.pdb
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\YoutubeBlog.Core.genruntimeconfig.cache
+C:\Users\irem.topcam\source\repos\YoutubeBlog\YoutubeBlog.Core\obj\Debug\net6.0\ref\YoutubeBlog.Core.dll
