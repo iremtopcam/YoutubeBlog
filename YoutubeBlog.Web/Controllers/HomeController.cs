@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using YoutubeBlog.Service.Services.Abstractions;
+using YoutubeBlog.Service.Services.Concrete;
 using YoutubeBlog.Web.Models;
 
 namespace YoutubeBlog.Web.Controllers
@@ -7,15 +9,18 @@ namespace YoutubeBlog.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IArticleService _articleService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger ,IArticleService articleService)
         {
             _logger = logger;
+            _articleService = articleService;
         }
-
-        public IActionResult Index()
+        //_articleService
+        public async Task< IActionResult> Index()
         {
-            return View();
+            var articles= await _articleService.GetAllArticlesWithCategoryNonDeletedAsync();
+            return View(articles);
         }
 
         public IActionResult Privacy()

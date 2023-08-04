@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using YoutubeBlog.Data.Context;
 using YoutubeBlog.Data.Repostories.Abstractions;
 using YoutubeBlog.Data.Repostories.Concretes;
+using YoutubeBlog.Data.UnitOfWork;
 
 namespace YoutubeBlog.Data.Extensions
 {
@@ -29,7 +30,8 @@ namespace YoutubeBlog.Data.Extensions
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
-            //services.AddScoped<IUnitOfWork, UnitOfWork>();
+            // o sunu degistirdim burada hata cikabilir
+            services.AddScoped<IUnitOfWork,UnitofWork>();
             return services;
         }
 
