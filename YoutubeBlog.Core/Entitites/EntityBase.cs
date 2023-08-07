@@ -8,6 +8,7 @@ namespace YoutubeBlog.Core.Entitites
 {
     public abstract class EntityBase : IEntityBase
     {
+   
       
 
         public virtual Guid Id { get; set; }= Guid.NewGuid();

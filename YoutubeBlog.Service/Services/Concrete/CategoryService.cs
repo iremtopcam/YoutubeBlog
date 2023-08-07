@@ -21,6 +21,7 @@ namespace YoutubeBlog.Service.Services.Concrete
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
         }
+        //is deleted true ise donmesin istiyoruz
         public async Task<List<CategoryDto>> GetAllCategoriesNonDeleted()
         {
             var categories = await unitOfWork.GetRepository<Category>().GetAllAsync(x => !x.IsDeleted);

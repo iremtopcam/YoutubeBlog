@@ -45,15 +45,15 @@ namespace YoutubeBlog.Service.Services.Concrete
             return map;
         }
 
-      //burada hata olabilir
-        public async Task<List<ArticleDto>> GetArticleWithCategoryNonDeletedAsync(Guid articleId)
+        public async Task<ArticleDto> GetArticleWithCategoryNonDeletedAsync(Guid articleId)
         {
-            var articles = await unitOfWork.GetRepository<Article>().GetAllAsync(x => !x.IsDeleted && x.Id == articleId ,x => x.Category);
-            var map = mapper.Map<List<ArticleDto>>(articles);
+
+            var article = await unitOfWork.GetRepository<Article>().GetAsync(x => !x.IsDeleted && x.Id == articleId, x => x.Category);
+            var map = mapper.Map<ArticleDto>(article);
 
             return map;
         }
-        public async Task UpdateArticleAsync(ArticleUpdateDto articleUpdateDto)
+        public async Task<string>UpdateArticleAsync(ArticleUpdateDto articleUpdateDto)
         {
             var article = await unitOfWork.GetRepository<Article>().GetAsync(x => !x.IsDeleted && x.Id == articleUpdateDto.Id, x => x.Category);
 
@@ -61,25 +61,40 @@ namespace YoutubeBlog.Service.Services.Concrete
             article.Title = articleUpdateDto.Title;
             article.Content = articleUpdateDto.Content;
             article.CategoryId = articleUpdateDto.CategoryId;
-
+           
 
 
             await unitOfWork.GetRepository<Article>().UpdateAsync(article);
             await unitOfWork.SaveAsync();
+
+            return article.Title;
         }
 
-        public async Task SafeDeleteArticleAsync(Guid articleId)
+
+
+        public async Task<String> SafeDeleteArticleAsync(Guid articleId)
         {
             var article = await unitOfWork.GetRepository<Article>().GetByGuidAsync(articleId);
 
-            article.IsDeleted= true;
+            article.IsDeleted = true;
             article.DeletedDate = DateTime.Now;
 
             await unitOfWork.GetRepository<Article>().UpdateAsync(article);
             await unitOfWork.SaveAsync();
+
+            return article.Title;
         }
 
-       
+
+
+        //Task<List<ArticleDto>> IArticleService.GetArticleWithCategoryNonDeletedAsync(Guid articleId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+
+
+
 
         //public async Task UpdateArticleAsync(ArticleUpdateDto articleUpdateDto)
         //{

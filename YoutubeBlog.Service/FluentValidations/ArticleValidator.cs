@@ -8,7 +8,7 @@ using YoutubeBlog.Entity.Entities;
 
 namespace YoutubeBlog.Service.FluentValidations
 {
-    internal class ArticleValidator : AbstractValidator<Article>
+    public class ArticleValidator : AbstractValidator<Article>
     {
         public ArticleValidator()
         {
