@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YoutubeBlog.Entity.DTOs.Categories;
+using YoutubeBlog.Entity.Entities;
 
-namespace YoutubeBlog.Entity.DTOs.Article
+namespace YoutubeBlog.Entity.DTOs.Articles
 {
+    //article
     public class ArticleDto
     {
         public Guid Id { get; set; }
@@ -19,9 +21,17 @@ namespace YoutubeBlog.Entity.DTOs.Article
 
         public DateTime CreatedDate{ get; set; }
 
+        public Image Image { get; set; }
+
+        public AppUser User { get; set; }
+
+
+
         public string CreatedBy { get; set; }
 
         public bool IsDeleted { get; set; }
+
+        public int ViewCount { get; set; }
 
 
     }

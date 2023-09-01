@@ -54,8 +54,8 @@ namespace YoutubeBlog.Data.Context
         public DbSet<Category> Categories { get; set; }
         public DbSet<Image> Images { get; set; }
 
-        //public DbSet<Visitor> Visitors { get; set; }
-        //public DbSet<ArticleVisitor> ArticleVisitors { get; set; }
+        public DbSet<Visitor> Visitors { get; set; }
+        public DbSet<ArticleVisitor> ArticleVisitors { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

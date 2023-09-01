@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using System.Reflection;
 using YoutubeBlog.Service.FluentValidations;
-
+using YoutubeBlog.Service.Helpers.Images;
 using YoutubeBlog.Service.Services.Abstractions;
 using YoutubeBlog.Service.Services.Concrete;
 
@@ -17,12 +17,18 @@ namespace YoutubeBlog.Service.Extensions
         {
             var assembly = Assembly.GetExecutingAssembly();
 
-            services.AddScoped<IArticleService,_articleService>();
+            services.AddScoped<IArticleService,ArticleService>();
             services.AddScoped<ICategoryService,CategoryService>();
+            services.AddScoped<IUserService,UserService>();
+            services.AddScoped<IImageHelper, imageHelper>();
+            services.AddScoped<IDashboardService, DashboardService>();
+
+            services.AddSingleton<IHttpContextAccessor,HttpContextAccessor>();
+
             services.AddAutoMapper(assembly);
 
-
-              services.AddControllersWithViews().AddFluentValidation(opt =>
+            services.AddControllersWithViews()
+                .AddFluentValidation(opt =>
             {
 
                 opt.RegisterValidatorsFromAssemblyContaining<ArticleValidator>();

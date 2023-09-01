@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NToastNotify;
-using YoutubeBlog.Entity.DTOs.Article;
+using YoutubeBlog.Entity.DTOs.Articles;
 using YoutubeBlog.Entity.Entities;
 using YoutubeBlog.Service.Extensions;
 using YoutubeBlog.Service.Services.Abstractions;
 using YoutubeBlog.Service.Services.Concrete;
+using YoutubeBlog.Web.Consts;
 using YoutubeBlog.Web.ResultMessages;
 
 namespace YoutubeBlog.Web.Areas.Admin.Controllers
@@ -28,13 +30,23 @@ namespace YoutubeBlog.Web.Areas.Admin.Controllers
             this.validator = validator;
             this.toast = toast;
         }
+        [HttpGet]
+        [Authorize(Roles = $"{RoleConsts.Superadmin}, {RoleConsts.Admin}, {RoleConsts.User}")]
         public async Task<IActionResult> Index()
         {
             var articles = await _articleService.GetAllArticlesWithCategoryNonDeletedAsync();
             return View(articles);
         }
+        [HttpGet]
+        [Authorize(Roles = $"{RoleConsts.Superadmin}, {RoleConsts.Admin}")]
+        public async Task<IActionResult> DeletedArticle()
+        {
+            var articles = await _articleService.GetAllArticlesWithCategoryDeletedAsync();
+            return View(articles);
+        }
 
         [HttpGet]
+        [Authorize(Roles = $"{RoleConsts.Superadmin}, {RoleConsts.Admin}")]
         public async Task<IActionResult> Add()
         {
             var categories = await categoryService.GetAllCategoriesNonDeleted();
@@ -42,15 +54,17 @@ namespace YoutubeBlog.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{RoleConsts.Superadmin}, {RoleConsts.Admin}")]
         public async Task<IActionResult> Add(ArticleAddDto articleAddDto)
         {
            var map = mapper.Map<Article>(articleAddDto);
-            toast.AddSuccessToastMessage(Messages.Article.Add(articleAddDto.Title), new ToastrOptions { Title="Başarılı"});
+           
             var result = await validator.ValidateAsync(map);
 
             if (result.IsValid)
             {
                 await _articleService.CreateArticleAsync(articleAddDto);
+                toast.AddSuccessToastMessage(Messages.Article.Add(articleAddDto.Title), new ToastrOptions { Title = "Başarılı" });
                 return RedirectToAction("Index", "Article", new { Area = "Admin" });
 
             }
@@ -66,7 +80,8 @@ namespace YoutubeBlog.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-         public async Task<IActionResult> Update(Guid articleId)
+        [Authorize(Roles = $"{RoleConsts.Superadmin}, {RoleConsts.Admin}")]
+        public async Task<IActionResult> Update(Guid articleId)
         
         {
             var article =await _articleService.GetArticleWithCategoryNonDeletedAsync(articleId);
@@ -81,6 +96,7 @@ namespace YoutubeBlog.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{RoleConsts.Superadmin}, {RoleConsts.Admin}")]
 
         public async Task<IActionResult> Update(ArticleUpdateDto articleUpdateDto)
 
@@ -106,12 +122,23 @@ namespace YoutubeBlog.Web.Areas.Admin.Controllers
             return View(articleUpdateDto);
 
         }
-
+        [Authorize(Roles = $"{RoleConsts.Superadmin}, {RoleConsts.Admin}")]
         public async Task<IActionResult> Delete(Guid articleId)
         {
             var title=await _articleService.SafeDeleteArticleAsync(articleId);
 
             toast.AddSuccessToastMessage(Messages.Article.Update(title), new ToastrOptions() { Title = "İşlem başarılı" });
+
+            return RedirectToAction("Index", "Article", new { Area = "Admin" });
+
+
+        }
+        [Authorize(Roles = $"{RoleConsts.Superadmin}, {RoleConsts.Admin}")]
+        public async Task<IActionResult> UndoDelete(Guid articleId)
+        {
+            var title = await _articleService.UndoDeleteArticleAsync(articleId);
+
+            toast.AddSuccessToastMessage(Messages.Article.UndoDelete(title), new ToastrOptions() { Title = "İşlem başarılı" });
 
             return RedirectToAction("Index", "Article", new { Area = "Admin" });
 

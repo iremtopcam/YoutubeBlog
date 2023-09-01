@@ -77,6 +77,8 @@ namespace YoutubeBlog.Data.Repostories.Concretes
                 return await Table.CountAsync(predicate);
             return await Table.CountAsync();
         }
+
+
     }
 }
 //task= void asenkron versioyndak

@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YoutubeBlog.Entity.DTOs.Article;
+using YoutubeBlog.Entity.DTOs.Articles;
 using YoutubeBlog.Entity.Entities;
+
 
 namespace YoutubeBlog.Service.AutoMapper.Articles
 {
@@ -15,7 +16,7 @@ namespace YoutubeBlog.Service.AutoMapper.Articles
         {
             CreateMap<ArticleDto, Article>().ReverseMap();
             CreateMap<ArticleUpdateDto, Article>().ReverseMap();
-            CreateMap<ArticleUpdateDto, ArticleDto>().ReverseMap();
+            CreateMap<ArticleUpdateDto, Article>().ReverseMap();
             CreateMap<ArticleAddDto, Article>().ReverseMap();
         }
     }

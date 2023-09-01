@@ -1,6 +1,4 @@
-﻿
-
-@*﻿@using YoutubeBlog.Web.Consts*@
+﻿@using YoutubeBlog.Web.Consts
 @model List<ArticleDto>
 
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -13,7 +11,7 @@
         <div class="table-responsive text-nowrap m-5">
 
             @{
-                //@if (!User.IsInRole($"{RoleConsts.User}"))
+                @if (!User.IsInRole($"{RoleConsts.User}"))
                 {
                     <a class="btn btn-success mb-3" asp-area="Admin" asp-controller="Article" asp-action="Add">
                         Makale Ekle <i class="bx bx-plus"></i>
@@ -31,12 +29,12 @@
                         <th>Oluşturulma Tarihi</th>
                         <th>Oluşturan</th>
                         <th>Durum</th>
-                       @* @{
+                        @{
                             @if (!User.IsInRole($"{RoleConsts.User}"))
                             {
                                 <th>İşlemler</th>
                             }
-                        }*@
+                        }
                     </tr>
                 </thead>
                 <tfoot>
@@ -46,13 +44,13 @@
                         <th>Oluşturulma Tarihi</th>
                         <th>Oluşturan</th>
                         <th>Durum</th>
-                        @*@{
+                        @{
                             @if (!User.IsInRole($"{RoleConsts.User}"))
                             {
                                 <th>İşlemler</th>
                             }
                         }
-*@
+
                     </tr>
                 </tfoot>
                 <tbody class="table-border-bottom-0">
@@ -65,14 +63,13 @@
                             <td>@article.CreatedBy</td>
                             <td>@(article.IsDeleted ? "Aktif Değil" : "Aktif")</td>
                             @{
-                                //@if (!User.IsInRole($"{RoleConsts.User}"))
+                                @if (!User.IsInRole($"{RoleConsts.User}"))
                                 {
 
                                     <td>
 
                                         <a class="btn btn-primary btn-sm" data-id="@article.Id" asp-area="Admin" asp-controller="Article" asp-action="Update" asp-route-articleId="@article.Id"><i class="bx bxs-edit"></i></a>
-                                        <a class="btn btn-danger btn-sm" data-id="@article.Id" asp-area="Admin" asp-controller="Article" asp-action="Delete"
-                                          asp-route-articleId="@article.Id"><i class="bx bx-minus-circle"></i></a>
+                                        <a class="btn btn-danger btn-sm" data-id="@article.Id" asp-area="Admin" asp-controller="Article" asp-action="Delete" asp-route-articleId="@article.Id"><i class="bx bx-minus-circle"></i></a>
 
 
                                     </td>
@@ -91,7 +88,7 @@
 
 </div>
 
-@*@section Scripts{
+@section Scripts{
     <script src="~/js/articleIndex.js" type="application/ecmascript"></script>
 }
-*@
+}

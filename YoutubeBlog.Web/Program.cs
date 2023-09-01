@@ -1,40 +1,30 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
+using NToastNotify;
 using YoutubeBlog.Data.Context;
 using YoutubeBlog.Data.Extensions;
-using YoutubeBlog.Service.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using YoutubeBlog.Entity.Entities;
-using NToastNotify;
+using YoutubeBlog.Service.Describers;
+//using YoutubeBlog.Service.Describers;
+using YoutubeBlog.Service.Extensions;
+using YoutubeBlog.Web.Filter.ArticleVisitors;
+//using YoutubeBlog.Web.Filters.ArticleVisitors;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.LoadDataLayerExtension(builder.Configuration);
 builder.Services.LoadServiceLayerExtension();
-
-builder.Services.AddControllersWithViews()
-    .AddNToastNotifyToastr(new ToastrOptions()
-    {
-        PositionClass = ToastPositions.TopRight,
-        TimeOut = 3000,
-    })
-    .AddRazorRuntimeCompilation();
-
-   
-
-//builder.Services.AddSession();
+builder.Services.AddSession();
 // Add services to the container.
-//builder.Services.AddControllersWithViews(opt =>
-//{
-//    opt.Filters.Add<ArticleVisitorFilter>();
-//})
-//.AddNToastNotifyToastr(new ToastrOptions()
-//{
-//    PositionClass = ToastPositions.TopRight,
-//    TimeOut = 3000,
-//})
-//.AddRazorRuntimeCompilation();
+
+builder.Services.AddControllersWithViews(opt =>
+{
+    opt.Filters.Add<ArticleVisitorFilter>();
+}).AddNToastNotifyToastr(new ToastrOptions()
+{
+    PositionClass = ToastPositions.TopRight,
+    TimeOut = 3000,
+})
+    .AddRazorRuntimeCompilation();
 
 
 builder.Services.AddIdentity<AppUser, AppRole>(opt =>
@@ -44,7 +34,7 @@ builder.Services.AddIdentity<AppUser, AppRole>(opt =>
     opt.Password.RequireUppercase = false;
 })
     .AddRoleManager<RoleManager<AppRole>>()
-    //.AddErrorDescriber<CustomIdentityErrorDescriber>()
+    .AddErrorDescriber<CustomIdentityErrorDescriber>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -79,10 +69,10 @@ if (!app.Environment.IsDevelopment())
 app.UseNToastNotify();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-//app.UseSession();
+app.UseSession();
 
 app.UseRouting();
-//app.UseAuthentication();
+app.UseAuthentication();
 app.UseAuthorization();
 
 
@@ -95,7 +85,5 @@ app.UseEndpoints(endpoints =>
     );
     endpoints.MapDefaultControllerRoute();
 });
-
-
 
 app.Run();

@@ -1,35 +1,64 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using System.Net.WebSockets;
+using System.Security.Claims;
 using YoutubeBlog.Data.UnitOfWork;
-using YoutubeBlog.Entity.DTOs.Article;
+using YoutubeBlog.Entity.DTOs.Articles;
 using YoutubeBlog.Entity.Entities;
+using YoutubeBlog.Entity.Enums;
+using YoutubeBlog.Service.Extensions;
+using YoutubeBlog.Service.Helpers.Images;
 using YoutubeBlog.Service.Services.Abstractions;
-using YoutubeBlog.Service.Services.Concrete;
 
 namespace YoutubeBlog.Service.Services.Concrete
 {
-    public class _articleService : IArticleService
+    public class ArticleService : IArticleService
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
-        public _articleService(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IImageHelper imageHelper;
+        private readonly ClaimsPrincipal _user;
+
+        public ArticleService(IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, IImageHelper imageHelper)
         {
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
-
+            this.httpContextAccessor = httpContextAccessor;
+            _user = httpContextAccessor.HttpContext.User;
+            this.imageHelper = imageHelper;
         }
-
+        public async Task<ArticleListDto> GetAllByPagingAsync(Guid? categoryId, int currentPage = 1, int pageSize = 3, bool isAscending = false)
+        {
+            pageSize = pageSize > 20 ? 20 : pageSize;
+            var articles = categoryId == null
+                ? await unitOfWork.GetRepository<Article>().GetAllAsync(a => !a.IsDeleted, a => a.Category, i => i.Image, u => u.User)
+                : await unitOfWork.GetRepository<Article>().GetAllAsync(a => a.CategoryId == categoryId && !a.IsDeleted,
+                    a => a.Category, i => i.Image, u => u.User);
+            var sortedArticles = isAscending
+                ? articles.OrderBy(a => a.CreatedDate).Skip((currentPage - 1) * pageSize).Take(pageSize).ToList()
+                : articles.OrderByDescending(a => a.CreatedDate).Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+            return new ArticleListDto
+            {
+                Articles = sortedArticles,
+                CategoryId = categoryId == null ? null : categoryId.Value,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                TotalCount = articles.Count,
+                IsAscending = isAscending
+            };
+        }
         public async Task CreateArticleAsync(ArticleAddDto articleAddDto)
         {
-            var userId = Guid.Parse("CB94223B-CCB8-4F2F-93D7-0DF96A7F065C");
-            var imageId = Guid.Parse("AF8E62F4-0625-4AAA-B3B1-29E13C8C59B5");
-           
-            var article= new Article(articleAddDto.Title,articleAddDto.Content,userId,articleAddDto.CategoryId,imageId);
+
+            var userId = _user.GetLoggedInUserId();
+            var userEmail = _user.GetLoggedInEmail();
+
+            var imageUpload = await imageHelper.Upload(articleAddDto.Title, articleAddDto.Photo, ImageType.Post);
+            Image image = new(imageUpload.FullName, articleAddDto.Photo.ContentType, userEmail);
+            await unitOfWork.GetRepository<Image>().AddAsync(image);
+
+            var article = new Article(articleAddDto.Title, articleAddDto.Content, userId, userEmail, articleAddDto.CategoryId, image.Id);
 
 
             await unitOfWork.GetRepository<Article>().AddAsync(article);
@@ -44,40 +73,52 @@ namespace YoutubeBlog.Service.Services.Concrete
 
             return map;
         }
-
         public async Task<ArticleDto> GetArticleWithCategoryNonDeletedAsync(Guid articleId)
         {
 
-            var article = await unitOfWork.GetRepository<Article>().GetAsync(x => !x.IsDeleted && x.Id == articleId, x => x.Category);
+            var article = await unitOfWork.GetRepository<Article>().GetAsync(x => !x.IsDeleted && x.Id == articleId, x => x.Category, i => i.Image, u => u.User);
             var map = mapper.Map<ArticleDto>(article);
 
             return map;
         }
-        public async Task<string>UpdateArticleAsync(ArticleUpdateDto articleUpdateDto)
+        public async Task<string> UpdateArticleAsync(ArticleUpdateDto articleUpdateDto)
         {
-            var article = await unitOfWork.GetRepository<Article>().GetAsync(x => !x.IsDeleted && x.Id == articleUpdateDto.Id, x => x.Category);
+            var userEmail = _user.GetLoggedInEmail();
+            var article = await unitOfWork.GetRepository<Article>().GetAsync(x => !x.IsDeleted && x.Id == articleUpdateDto.Id, x => x.Category, i => i.Image);
 
+            if (articleUpdateDto.Photo != null)
+            {
+                imageHelper.Delete(article.Image.FileName);
 
-            article.Title = articleUpdateDto.Title;
-            article.Content = articleUpdateDto.Content;
-            article.CategoryId = articleUpdateDto.CategoryId;
-           
+                var imageUpload = await imageHelper.Upload(articleUpdateDto.Title, articleUpdateDto.Photo, ImageType.Post);
+                Image image = new(imageUpload.FullName, articleUpdateDto.Photo.ContentType, userEmail);
+                await unitOfWork.GetRepository<Image>().AddAsync(image);
 
+                article.ImageId = image.Id;
+
+            }
+
+            mapper.Map(articleUpdateDto, article);
+            //article.Title = articleUpdateDto.Title;
+            //article.Content = articleUpdateDto.Content;
+            //article.CategoryId = articleUpdateDto.CategoryId;
+            article.ModifiedDate = DateTime.Now;
+            article.ModifiedBy = userEmail;
 
             await unitOfWork.GetRepository<Article>().UpdateAsync(article);
             await unitOfWork.SaveAsync();
 
             return article.Title;
+
         }
-
-
-
-        public async Task<String> SafeDeleteArticleAsync(Guid articleId)
+        public async Task<string> SafeDeleteArticleAsync(Guid articleId)
         {
+            var userEmail = _user.GetLoggedInEmail();
             var article = await unitOfWork.GetRepository<Article>().GetByGuidAsync(articleId);
 
             article.IsDeleted = true;
             article.DeletedDate = DateTime.Now;
+            article.DeletedBy = userEmail;
 
             await unitOfWork.GetRepository<Article>().UpdateAsync(article);
             await unitOfWork.SaveAsync();
@@ -85,36 +126,47 @@ namespace YoutubeBlog.Service.Services.Concrete
             return article.Title;
         }
 
+        public async Task<List<ArticleDto>> GetAllArticlesWithCategoryDeletedAsync()
+        {
+            var articles = await unitOfWork.GetRepository<Article>().GetAllAsync(x => x.IsDeleted, x => x.Category);
+            var map = mapper.Map<List<ArticleDto>>(articles);
 
+            return map;
+        }
 
-        //Task<List<ArticleDto>> IArticleService.GetArticleWithCategoryNonDeletedAsync(Guid articleId)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<string> UndoDeleteArticleAsync(Guid articleId)
+        {
+            var article = await unitOfWork.GetRepository<Article>().GetByGuidAsync(articleId);
 
+            article.IsDeleted = false;
+            article.DeletedDate = null;
+            article.DeletedBy = null;
 
+            await unitOfWork.GetRepository<Article>().UpdateAsync(article);
+            await unitOfWork.SaveAsync();
 
+            return article.Title;
+        }
 
+        public async Task<ArticleListDto> SearchAsync(string keyword, int currentPage = 1, int pageSize = 3, bool isAscending = false)
+        {
+            pageSize = pageSize > 20 ? 20 : pageSize;
+            var articles = await unitOfWork.GetRepository<Article>().GetAllAsync(
+                a => !a.IsDeleted && (a.Title.Contains(keyword) || a.Content.Contains(keyword) || a.Category.Name.Contains(keyword)),
+            a => a.Category, i => i.Image, u => u.User);
 
-        //public async Task UpdateArticleAsync(ArticleUpdateDto articleUpdateDto)
-        //{
-        //    var article = await unitOfWork.GetRepository<Article>().GetAsync(x => !x.IsDeleted && x.Id == articleUpdateDto.Id, x => x.Category);
-
-
-        //    article.Title = articleUpdateDto.Title;
-        //    article.Content = articleUpdateDto.Content;
-        //    article.CategoryId = articleUpdateDto.CategoryId;
-
-
-
-        //    await unitOfWork.GetRepository<Article>().UpdateAsync(article);
-        //    await unitOfWork.SaveAsync();
-        //}
-
-
-
+            var sortedArticles = isAscending
+                ? articles.OrderBy(a => a.CreatedDate).Skip((currentPage - 1) * pageSize).Take(pageSize).ToList()
+                : articles.OrderByDescending(a => a.CreatedDate).Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+            return new ArticleListDto
+            {
+                Articles = sortedArticles,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                TotalCount = articles.Count,
+                IsAscending = isAscending
+            };
+        }
     }
 }
-
-
 

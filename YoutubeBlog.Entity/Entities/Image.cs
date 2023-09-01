@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YoutubeBlog.Core.Entitites;
+using YoutubeBlog.Entity.Enums;
 
 namespace YoutubeBlog.Entity.Entities
 {
@@ -17,11 +18,12 @@ namespace YoutubeBlog.Entity.Entities
         }
 
 
-        public Image(string fileName,string  fileType) 
+        public Image(string fileName,string  fileType,string createdBy) 
         
         {
             FileName = fileName;
             FileType = fileType;
+            CreatedBy = createdBy;
         
         
         }
@@ -29,6 +31,8 @@ namespace YoutubeBlog.Entity.Entities
         //public Guid Id { get; set; } 
         public string FileName { get; set; } 
         public string FileType { get; set; } 
+
+       
         public ICollection<Article> Articles { get; set; } 
 
         public ICollection<AppUser> AppUsers { get; set; }
